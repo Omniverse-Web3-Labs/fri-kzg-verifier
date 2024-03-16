@@ -6,7 +6,7 @@ pub mod tests {
     use itertools::Itertools;
 
     use log::{info, LevelFilter};
-    use plonky2::{field::extension::Extendable, hash::{hash_types::{HashOut, RichField}, merkle_tree::MerkleTree, poseidon::PoseidonHash}, iop::witness::{PartialWitness, WitnessWrite}, plonk::{circuit_builder::CircuitBuilder, circuit_data::CircuitConfig, config::{GenericConfig, GenericHashOut, PoseidonGoldilocksConfig}}};
+    use plonky2::{field::extension::Extendable, fri::FriConfig, hash::{hash_types::{HashOut, RichField}, merkle_tree::MerkleTree, poseidon::PoseidonHash}, iop::witness::{PartialWitness, WitnessWrite}, plonk::{circuit_builder::CircuitBuilder, circuit_data::CircuitConfig, config::{GenericConfig, GenericHashOut, PoseidonGoldilocksConfig}}};
     use plonky2_ecdsa::gadgets::recursive_proof::{self, recursive_proof_2};
     use semaphore_aggregation::plonky2_verifier::{bn245_poseidon::plonky2_config::{standard_inner_stark_verifier_config, standard_stark_verifier_config, Bn254PoseidonGoldilocksConfig}, verifier_api::verify_inside_snark};
     use zk_6358_prover::circuit::signature_prover::build_merkle_root_chip;
@@ -16,7 +16,8 @@ pub mod tests {
     C: GenericConfig<D, F = F>,
     const D: usize,>() -> Result<recursive_proof::ProofTuple<F, C, D>> {
 
-        let config = standard_inner_stark_verifier_config();
+        // let config = standard_inner_stark_verifier_config();
+        let config = CircuitConfig::standard_ecc_config();
         let mut builder = CircuitBuilder::<F, D>::new(config);
         let mut witness = PartialWitness::new();
 
@@ -68,11 +69,22 @@ pub mod tests {
 
         let inner_proof = a_simple_circuit::<F, INNERC, D>().unwrap();
 
-        // let config = standard_inner_stark_verifier_config();
-        // let middle_proof = recursive_proof_2::<F, INNERC, INNERC, D>(&vec![inner_proof], &config, None).unwrap();
+        // let st_config = standard_inner_stark_verifier_config();
+        let st_config = CircuitConfig::standard_recursion_config();
+        let st_config = CircuitConfig {
+            fri_config: FriConfig {
+                rate_bits: 7,
+                proof_of_work_bits: 16,
+                num_query_rounds: 12,
+                ..st_config.fri_config.clone()
+            },
+            ..st_config
+        };
+        let middle_proof = recursive_proof_2::<F, INNERC, INNERC, D>(&vec![inner_proof], &st_config, None).unwrap();
 
         let starky_config = standard_stark_verifier_config();
-        let final_proof = recursive_proof_2::<F, STRKC, INNERC, D>(&vec![inner_proof], &starky_config, None).unwrap();
+
+        let final_proof = recursive_proof_2::<F, STRKC, INNERC, D>(&vec![middle_proof], &starky_config, None).unwrap();
 
         proof_tuple_to_local("s_smt_sv", &final_proof, false).unwrap();
         proof_tuple_to_local("s_smt_sv", &final_proof, true).unwrap();
@@ -80,6 +92,6 @@ pub mod tests {
         write_circuit_p_v_data_to_local("s_smt_sv", &final_proof).unwrap();
 
         info!("start verify in snark");
-        verify_inside_snark(19, final_proof);
+        verify_inside_snark(21, final_proof);
     }
 }
