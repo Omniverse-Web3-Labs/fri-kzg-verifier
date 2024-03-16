@@ -1,0 +1,21 @@
+[package]
+name = "fri-kzg-verifier"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+plonky2={ path = "../plonky2/plonky2" }         # https://github.com/xiyu1984/plonky2/tree/stark-verifier
+plonky2_ecdsa = {path = "../plonky2-ecdsa"}  # https://github.com/xiyu1984/plonky2-ecdsa/tree/development
+
+semaphore_aggregation ={ path = "../community/stark-verifier" }     # https://github.com/xiyu1984/stark-verifier
+halo2_solidity_verifier = {path="../community/halo2-solidity-verifier", features=["evm"]}       #https://github.com/xiyu1984/halo2-solidity-verifierS
+
+circuit-local-storage = {path = "../zk-omni-executor/circuit-local-storage"}    # https://github.com/Omniverse-Web3-Labs/zk-omni-executor/tree/mac-sonoma-14.4 # private currently
+zk-6358-prover = {path = "../zk-omni-executor/zk-6358-prover"}
+
+anyhow = "1.0.56"  
+log = "0.4.14"
+env_logger = "0.10.0"
+itertools = { version = "0.11.0", default-features = false }
