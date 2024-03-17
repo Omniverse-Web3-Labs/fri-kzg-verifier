@@ -14,6 +14,7 @@ halo2_solidity_verifier = {path="../community/halo2-solidity-verifier", features
 
 circuit-local-storage = {path = "../zk-omni-executor/circuit-local-storage"}    # https://github.com/Omniverse-Web3-Labs/zk-omni-executor/tree/mac-sonoma-14.4 # private currently
 zk-6358-prover = {path = "../zk-omni-executor/zk-6358-prover"}
+client-verifier = {path = "../zk-omni-executor/client-verifier"}
 
 anyhow = "1.0.56"  
 log = "0.4.14"
