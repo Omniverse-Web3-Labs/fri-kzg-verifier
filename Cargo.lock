@@ -1008,11 +1008,13 @@ dependencies = [
  "circuit-local-storage",
  "client-verifier",
  "env_logger",
+ "halo2_proofs",
  "halo2_solidity_verifier",
  "itertools 0.11.0",
  "log",
  "plonky2",
  "plonky2_ecdsa",
+ "rand",
  "semaphore_aggregation",
  "zk-6358-prover",
 ]

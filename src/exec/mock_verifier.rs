@@ -94,7 +94,7 @@ pub mod tests {
         write_circuit_p_v_data_to_local("s_smt_sv", &final_proof).unwrap();
 
         info!("start verify in snark");
-        verify_inside_snark(21, final_proof);
+        verify_inside_snark(21, final_proof, None);
     }
 
     #[test]
@@ -110,7 +110,7 @@ pub mod tests {
         type STRKC = Bn254PoseidonGoldilocksConfig;
         type F = <INNERC as GenericConfig<D>>::F;
 
-        let pv_path = PVDataPath::new("2");
+        let pv_path = PVDataPath::new("4");
 
         let vd = VerifierCircuitData::<F, INNERC, D>::load_from_file(&pv_path.verifier_only_path, &pv_path.common_path);
 
@@ -124,6 +124,6 @@ pub mod tests {
         let final_proof = recursive_proof_2::<F, STRKC, INNERC, D>(&vec![high_rate_proof], &starky_config, None).unwrap();
 
         info!("start verify in snark");
-        verify_inside_snark(21, final_proof);
+        verify_inside_snark(20, final_proof, None);
     }
 }

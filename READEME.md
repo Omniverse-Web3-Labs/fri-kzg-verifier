@@ -10,3 +10,11 @@ cargo test -r --package fri-kzg-verifier --lib -- exec::mock_verifier::tests::te
 cargo test -r --package fri-kzg-verifier --lib -- exec::mock_verifier::tests::test_evm_verifier_from_local --exact --nocapture --ignored
 
 ```
+
+## Integrated Test
+
+```sh
+
+cargo test -r --test test_verifier_solidity -- test_verifier_solidity --exact --nocapture --ignored
+
+```
