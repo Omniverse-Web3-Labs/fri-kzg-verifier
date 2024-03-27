@@ -8,7 +8,7 @@ use plonky2::{
 
 use plonky2_ecdsa::gadgets::recursive_proof::{recursive_proof_2, ProofTuple};
 
-use semaphore_aggregation::plonky2_verifier::{bn245_poseidon::plonky2_config::{standard_stark_verifier_config, Bn254PoseidonGoldilocksConfig}, verifier_api::verify_inside_snark_2};
+use semaphore_aggregation::plonky2_verifier::{bn245_poseidon::plonky2_config::{standard_stark_verifier_config, Bn254PoseidonGoldilocksConfig}, verifier_api::verify_inside_snark_solidity};
 
 use log::info;
 use anyhow::Result;
@@ -40,7 +40,7 @@ pub fn generate_kzg_verifier
     let final_proof = recursive_proof_2::<F, STRKC, INNERC, D>(&vec![high_rate_proof], &starky_config, None)?;
 
     info!("start verify in snark");
-    verify_inside_snark_2(degree, final_proof, kzg_param, save);
+    verify_inside_snark_solidity(degree, final_proof, kzg_param, save);
     
     Ok(())
 }

@@ -22,11 +22,11 @@ fn test_verifier_solidity() {
     let mut rng = rand::thread_rng();
     let param = ParamsKZG::<Bn256>::setup(degree, &mut rng);
 
-    let proof_id = "2";
+    let proof_id = "8-4";
     let high_rate_proof = load_fri_proof::<F, INNERC, D>(proof_id).unwrap();
     generate_kzg_verifier(high_rate_proof, degree, &param, Some(proof_id.to_string())).unwrap();
 
-    let proof_id = "4";
+    let proof_id = "8-4s";
     let high_rate_proof = load_fri_proof::<F, INNERC, D>(proof_id).unwrap();
     generate_kzg_verifier(high_rate_proof, degree, &param, Some(proof_id.to_string())).unwrap();
 }
