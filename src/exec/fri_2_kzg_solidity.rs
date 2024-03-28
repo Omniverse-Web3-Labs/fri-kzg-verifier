@@ -1,7 +1,15 @@
+use std::fs;
+
 use circuit_local_storage::circuit::p_v_io::{read_ppis_from_local, PVDataPath};
 use client_verifier::circuit::verify_from_file::PureVerifier;
 
-use halo2_proofs::{halo2curves::bn256::Bn256, poly::kzg::commitment::ParamsKZG};
+use halo2_proofs::{
+    arithmetic::{parallelize, Field}, 
+    halo2curves::{bn256::Bn256, group::{Group, Curve, prime::PrimeCurveAffine}, pairing::Engine}, 
+    poly::{commitment::{Params, ParamsProver}, kzg::commitment::ParamsKZG}, 
+    SerdeFormat
+};
+
 use plonky2::{
     field::extension::Extendable, hash::hash_types::RichField, plonk::{circuit_data::VerifierCircuitData, config::{GenericConfig, PoseidonGoldilocksConfig}}
 };
@@ -12,6 +20,8 @@ use semaphore_aggregation::plonky2_verifier::{bn245_poseidon::plonky2_config::{s
 
 use log::info;
 use anyhow::Result;
+
+pub const KZG_SETUP_DIR: &str = "/Users/monkey/Downloads/";
 
 pub fn load_fri_proof
 <F: RichField + Extendable<D>, C: GenericConfig<D, F = F>, const D: usize>
@@ -43,4 +53,64 @@ pub fn generate_kzg_verifier
     verify_inside_snark_solidity(degree, final_proof, kzg_param, save);
     
     Ok(())
+}
+
+pub fn load_kzg_params(filename: &str, equip: bool) -> ParamsKZG<Bn256>
+{
+    let kzg_params_buffer = fs::read(filename).expect("read kzg params file failed");
+    let mut kzg_params = ParamsKZG::<Bn256>::read_custom(&mut &kzg_params_buffer[..], SerdeFormat::RawBytes).expect("`read_custom` bytes error");
+
+    if equip {
+        kzg_params.equip_kzg_params();
+    }
+
+    kzg_params
+}
+
+/////////////////////////////////////////////////////////////////////////
+/// trait: Equip the KZG params
+pub trait KZGEquipment<E: Engine> {
+    fn equip_kzg_params(&mut self);
+}
+
+impl KZGEquipment<Bn256> for ParamsKZG<Bn256>
+{
+    fn equip_kzg_params(&mut self) {
+        let rng = rand::thread_rng();
+
+        let n: u64 = self.n();
+
+        // Calculate g = [G1, [s] G1, [s^2] G1, ..., [s^(n-1)] G1] in parallel.
+        let g1 = self.get_g()[0];
+        let s = <<Bn256 as Engine>::Fr>::random(rng);
+
+        let mut g_projective = vec![<Bn256 as Engine>::G1::identity(); n as usize];
+        parallelize(&mut g_projective, |g, start| {
+            let mut current_g: <Bn256 as Engine>::G1 = g1.into();
+            current_g *= s.pow_vartime([start as u64]);
+            for g in g.iter_mut() {
+                *g = current_g;
+                current_g *= s;
+            }
+        });
+
+        let g = {
+            let mut g = vec![<Bn256 as Engine>::G1Affine::identity(); n as usize];
+            parallelize(&mut g, |g, starts| {
+                <Bn256 as Engine>::G1::batch_normalize(&g_projective[starts..(starts + g.len())], g);
+            });
+            g
+        };
+
+        let g2 = self.g2();
+        let s_g2 = (g2 * s).into();
+
+        *self = self.from_parts(
+            self.k(),
+            g,
+            None,
+            g2,
+            s_g2,
+        );
+    }
 }

@@ -17,4 +17,6 @@ cargo test -r --package fri-kzg-verifier --lib -- exec::mock_verifier::tests::te
 
 cargo test -r --test test_verifier_solidity -- test_verifier_solidity --exact --nocapture --ignored
 
+cargo test -r --test test_verifier_solidity -- test_v_s_with_kzg_loaded --exact --nocapture --ignored
+
 ```
