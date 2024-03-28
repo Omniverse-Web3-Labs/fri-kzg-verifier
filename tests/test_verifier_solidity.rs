@@ -1,5 +1,5 @@
 
-use fri_kzg_verifier::exec::fri_2_kzg_solidity::{generate_kzg_verifier, load_fri_proof, load_kzg_params};
+use fri_kzg_verifier::exec::fri_2_kzg_solidity::{generate_kzg_verifier, load_fri_proof, load_kzg_params, KZG_SETUP_DIR};
 use log::LevelFilter;
 use plonky2::plonk::config::{GenericConfig, PoseidonGoldilocksConfig};
 
@@ -42,7 +42,7 @@ fn test_v_s_with_kzg_loaded() {
 
     let degree: u32 = 20;
 
-    let kzg_param = load_kzg_params(&format!("/Users/monkey/Downloads/kzg_bn254_{degree}.srs"), true);
+    let kzg_param = load_kzg_params(&format!("{KZG_SETUP_DIR}/kzg_bn254_{degree}.srs"), true);
 
     const D: usize = 2;
     type INNERC = PoseidonGoldilocksConfig;

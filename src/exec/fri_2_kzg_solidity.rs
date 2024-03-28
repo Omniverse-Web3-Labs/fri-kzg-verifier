@@ -21,7 +21,7 @@ use semaphore_aggregation::plonky2_verifier::{bn245_poseidon::plonky2_config::{s
 use log::info;
 use anyhow::Result;
 
-pub const KZG_SETUP_DIR: &str = "/Users/monkey/Downloads/";
+pub const KZG_SETUP_DIR: &str = "/Users/monkey/Downloads";
 
 pub fn load_fri_proof
 <F: RichField + Extendable<D>, C: GenericConfig<D, F = F>, const D: usize>
@@ -81,16 +81,16 @@ impl KZGEquipment<Bn256> for ParamsKZG<Bn256>
         let n: u64 = self.n();
 
         // Calculate g = [G1, [s] G1, [s^2] G1, ..., [s^(n-1)] G1] in parallel.
-        let g1 = self.get_g()[0];
+        // let g1 = <Bn256 as Engine>::G1Affine::generator();
         let s = <<Bn256 as Engine>::Fr>::random(rng);
 
+        let g_projective_affine = self.get_g();
         let mut g_projective = vec![<Bn256 as Engine>::G1::identity(); n as usize];
         parallelize(&mut g_projective, |g, start| {
-            let mut current_g: <Bn256 as Engine>::G1 = g1.into();
-            current_g *= s.pow_vartime([start as u64]);
-            for g in g.iter_mut() {
-                *g = current_g;
-                current_g *= s;
+            let mut s_pow = s.pow_vartime([start as u64]);
+            for (idx, g) in g.iter_mut().enumerate() {
+                *g = Into::<<Bn256 as Engine>::G1>::into(g_projective_affine[start + idx]) * s_pow;
+                s_pow *= s;
             }
         });
 
