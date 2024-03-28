@@ -103,7 +103,7 @@ impl KZGEquipment<Bn256> for ParamsKZG<Bn256>
         };
 
         let g2 = self.g2();
-        let s_g2 = (g2 * s).into();
+        let s_g2 = (self.s_g2() * s).into();
 
         *self = self.from_parts(
             self.k(),
