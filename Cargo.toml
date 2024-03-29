@@ -11,11 +11,11 @@ plonky2_ecdsa = {path = "../plonky2-ecdsa"}  # https://github.com/xiyu1984/plonk
 
 halo2_proofs = { git = "https://github.com/privacy-scaling-explorations/halo2", tag = "v0.3.0" }
 semaphore_aggregation ={ path = "../community/stark-verifier" }     # https://github.com/xiyu1984/stark-verifier
-halo2_solidity_verifier = {path="../community/halo2-solidity-verifier", features=["evm"]}       #https://github.com/xiyu1984/halo2-solidity-verifierS
+halo2_solidity_verifier = {path="../community/halo2-solidity-verifier", features=["evm"]}       # https://github.com/xiyu1984/halo2-solidity-verifier
 
 circuit-local-storage = {path = "../zk-omni-executor/circuit-local-storage"}    # https://github.com/Omniverse-Web3-Labs/zk-omni-executor/tree/mac-sonoma-14.4 # private currently
-zk-6358-prover = {path = "../zk-omni-executor/zk-6358-prover"}
-client-verifier = {path = "../zk-omni-executor/client-verifier"}
+zk-6358-prover = {path = "../zk-omni-executor/zk-6358-prover"}                  # https://github.com/Omniverse-Web3-Labs/zk-omni-executor/tree/mac-sonoma-14.4 # private currently
+client-verifier = {path = "../zk-omni-executor/client-verifier"}                # https://github.com/Omniverse-Web3-Labs/zk-omni-executor/tree/mac-sonoma-14.4 # private currently
 
 anyhow = "1.0.56"  
 log = "0.4.14"
