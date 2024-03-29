@@ -1,5 +1,5 @@
 
-use fri_kzg_verifier::exec::fri_2_kzg_solidity::{generate_kzg_verifier, load_fri_proof, load_kzg_params, KZG_SETUP_DIR};
+use fri_kzg_verifier::exec::{fri_2_kzg_solidity::{generate_kzg_verifier, load_fri_proof}, kzg_setup::load_kzg_params};
 use log::LevelFilter;
 use plonky2::plonk::config::{GenericConfig, PoseidonGoldilocksConfig};
 
@@ -21,7 +21,7 @@ fn test_verifier_solidity() {
 
     // let mut rng = rand::thread_rng();
     // let param = ParamsKZG::<Bn256>::setup(degree, &mut rng);
-    let param = load_kzg_params(&format!("/Users/monkey/Downloads/kzg_bn254_{degree}.srs"), true);
+    let param = load_kzg_params(degree, true);
 
     let proof_id = "8-4";
     let high_rate_proof = load_fri_proof::<F, INNERC, D>(proof_id).unwrap();
@@ -42,7 +42,7 @@ fn test_v_s_with_kzg_loaded() {
 
     let degree: u32 = 20;
 
-    let kzg_param = load_kzg_params(&format!("{KZG_SETUP_DIR}/kzg_bn254_{degree}.srs"), true);
+    let kzg_param = load_kzg_params(degree, true);
 
     const D: usize = 2;
     type INNERC = PoseidonGoldilocksConfig;

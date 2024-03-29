@@ -13,10 +13,20 @@ cargo test -r --package fri-kzg-verifier --lib -- exec::mock_verifier::tests::te
 
 ## Integrated Test
 
+### `test_verifier_solidity`
+
 ```sh
 
 cargo test -r --test test_verifier_solidity -- test_verifier_solidity --exact --nocapture --ignored
 
 cargo test -r --test test_verifier_solidity -- test_v_s_with_kzg_loaded --exact --nocapture --ignored
+
+```
+
+### `test_equip_kzg_halo2_solidity`
+
+```sh
+
+cargo test -r --test test_equip_kzg_halo2_solidity
 
 ```
