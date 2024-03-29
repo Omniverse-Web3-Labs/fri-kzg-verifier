@@ -1,7 +1,10 @@
 
+use colored::Colorize;
 use fri_kzg_verifier::exec::{fri_2_kzg_solidity::{generate_kzg_proof, generate_kzg_verifier, load_fri_proof}, kzg_setup::load_kzg_params};
-use log::LevelFilter;
+use halo2_solidity_verifier::{compile_solidity, encode_calldata, Evm};
+use log::{info, LevelFilter};
 use plonky2::plonk::config::{GenericConfig, PoseidonGoldilocksConfig};
+use semaphore_aggregation::plonky2_verifier::verifier_api::std_ops;
 
 // use halo2_proofs::{halo2curves::bn256::Bn256, poly::kzg::commitment::ParamsKZG};
 
@@ -73,6 +76,19 @@ fn test_verify_proof_by_solidity_verifier() {
     let proof_id = "8-4";
     let high_rate_proof = load_fri_proof::<F, INNERC, D>(proof_id).unwrap();
 
+    // load and compile solidity
+    let verifier_solidity = std_ops::load_solidity("8-4s_verifier.sol").expect("load `8-4s_verifier.sol` error");
+    let vk_solidity = std_ops::load_solidity("8-4s_vk.sol").expect("load `8-4s_vk.sol` error");
+    let mut evm = Evm::default();
+    let verifier_creation_code = compile_solidity(&verifier_solidity);
+    let verifier_address = evm.create(verifier_creation_code);
+    let vk_creation_code = compile_solidity(&vk_solidity);
+    let vk_address = evm.create(vk_creation_code);
+
     // the `instances` are the public inputs
     let (proof, instances) = generate_kzg_proof(high_rate_proof, &kzg_param, None).unwrap();
+    
+    let calldata = encode_calldata(Some(vk_address.into()), &proof, &instances);
+    let (gas_cost, _output) = evm.call(verifier_address, calldata);
+    info!("{}", format!("Gas cost: {}", gas_cost).yellow().bold());
 }

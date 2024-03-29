@@ -21,6 +21,8 @@ cargo test -r --test test_verifier_solidity -- test_verifier_solidity --exact --
 
 cargo test -r --test test_verifier_solidity -- test_v_s_with_kzg_loaded --exact --nocapture --ignored
 
+cargo test -r --test test_verifier_solidity -- test_verify_proof_by_solidity_verifier --exact --nocapture --ignored
+
 ```
 
 ### `test_equip_kzg_halo2_solidity`

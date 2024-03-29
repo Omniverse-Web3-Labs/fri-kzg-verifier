@@ -2,6 +2,7 @@
 use circuit_local_storage::circuit::p_v_io::{read_ppis_from_local, PVDataPath};
 use client_verifier::circuit::verify_from_file::PureVerifier;
 
+use colored::Colorize;
 use halo2_proofs::{
     halo2curves::bn256::{Bn256, Fr}, 
     poly::kzg::commitment::ParamsKZG, 
@@ -17,8 +18,6 @@ use semaphore_aggregation::plonky2_verifier::{bn245_poseidon::plonky2_config::{s
 
 use log::info;
 use anyhow::Result;
-
-pub const KZG_SETUP_DIR: &str = "/Users/monkey/Downloads";
 
 pub fn load_fri_proof
 <F: RichField + Extendable<D>, C: GenericConfig<D, F = F>, const D: usize>
@@ -46,7 +45,7 @@ pub fn generate_kzg_verifier
 
     let final_proof = recursive_proof_2::<F, STRKC, INNERC, D>(&vec![high_rate_proof], &starky_config, None)?;
 
-    info!("start verify in snark");
+    info!("{}", "start verify in snark".cyan().bold());
     verify_inside_snark_solidity(degree, final_proof, kzg_param, save);
     
     Ok(())
@@ -64,6 +63,6 @@ pub fn generate_kzg_proof
 
     let final_proof = recursive_proof_2::<F, STRKC, INNERC, D>(&vec![high_rate_proof], &starky_config, None)?;
 
-    info!("start verify in snark");
+    info!("{}", "start verify in snark".cyan().bold());
     make_checked_fri2kzg_snark_proof(final_proof, kzg_param, save)
 }
