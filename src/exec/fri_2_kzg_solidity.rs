@@ -3,7 +3,7 @@ use circuit_local_storage::circuit::p_v_io::{read_ppis_from_local, PVDataPath};
 use client_verifier::circuit::verify_from_file::PureVerifier;
 
 use halo2_proofs::{
-    halo2curves::bn256::Bn256, 
+    halo2curves::bn256::{Bn256, Fr}, 
     poly::kzg::commitment::ParamsKZG, 
 };
 
@@ -13,7 +13,7 @@ use plonky2::{
 
 use plonky2_ecdsa::gadgets::recursive_proof::{recursive_proof_2, ProofTuple};
 
-use semaphore_aggregation::plonky2_verifier::{bn245_poseidon::plonky2_config::{standard_stark_verifier_config, Bn254PoseidonGoldilocksConfig}, verifier_api::verify_inside_snark_solidity};
+use semaphore_aggregation::plonky2_verifier::{bn245_poseidon::plonky2_config::{standard_stark_verifier_config, Bn254PoseidonGoldilocksConfig}, verifier_api::{make_checked_fri2kzg_snark_proof, verify_inside_snark_solidity}};
 
 use log::info;
 use anyhow::Result;
@@ -50,4 +50,20 @@ pub fn generate_kzg_verifier
     verify_inside_snark_solidity(degree, final_proof, kzg_param, save);
     
     Ok(())
+}
+
+pub fn generate_kzg_proof
+(high_rate_proof: ProofTuple<plonky2::field::goldilocks_field::GoldilocksField, PoseidonGoldilocksConfig, 2>, kzg_param: &ParamsKZG<Bn256>, save: Option<String>) -> Result<(Vec<u8>, Vec<Fr>)>
+{
+    type F = plonky2::field::goldilocks_field::GoldilocksField;
+    type INNERC = PoseidonGoldilocksConfig;
+    type STRKC = Bn254PoseidonGoldilocksConfig;
+    const D: usize = 2;
+    
+    let starky_config = standard_stark_verifier_config();
+
+    let final_proof = recursive_proof_2::<F, STRKC, INNERC, D>(&vec![high_rate_proof], &starky_config, None)?;
+
+    info!("start verify in snark");
+    make_checked_fri2kzg_snark_proof(final_proof, kzg_param, save)
 }
