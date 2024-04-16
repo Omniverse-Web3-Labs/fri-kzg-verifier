@@ -1,7 +1,9 @@
 
 use colored::Colorize;
 use fri_kzg_verifier::exec::{fri_2_kzg_solidity::{generate_kzg_proof, generate_kzg_verifier, load_fri_proof}, kzg_setup::load_kzg_params};
+use halo2_proofs::halo2curves::bn256::Fr;
 use halo2_solidity_verifier::{compile_solidity, encode_calldata, Evm};
+use itertools::Itertools;
 use log::{info, LevelFilter};
 use plonky2::plonk::config::{GenericConfig, PoseidonGoldilocksConfig};
 use semaphore_aggregation::plonky2_verifier::verifier_api::std_ops;
@@ -30,7 +32,7 @@ fn test_verifier_solidity() {
     let high_rate_proof = load_fri_proof::<F, INNERC, D>(proof_id).unwrap();
     generate_kzg_verifier(high_rate_proof, degree, &param, Some(proof_id.to_string())).unwrap();
 
-    let proof_id = "8-4s";
+    let proof_id = "16-4";
     let high_rate_proof = load_fri_proof::<F, INNERC, D>(proof_id).unwrap();
     generate_kzg_verifier(high_rate_proof, degree, &param, Some(proof_id.to_string())).unwrap();
 }
@@ -51,15 +53,15 @@ fn test_v_s_with_kzg_loaded() {
     type INNERC = PoseidonGoldilocksConfig;
     type F = <INNERC as GenericConfig<D>>::F;
 
-    let proof_id = "8-4";
+    let proof_id = "16-4";
     let high_rate_proof = load_fri_proof::<F, INNERC, D>(proof_id).unwrap();
 
-    generate_kzg_verifier(high_rate_proof, degree, &kzg_param, None).unwrap();
+    generate_kzg_verifier(high_rate_proof, degree, &kzg_param, Some(proof_id.to_string())).unwrap();
 }
 
 #[test]
 #[ignore]
-fn test_verify_proof_by_solidity_verifier() {
+fn test_generate_proof_to_local() {
     let mut log_builder = env_logger::Builder::from_default_env();
     log_builder.format_timestamp(None);
     log_builder.filter_level(LevelFilter::Info);
@@ -73,12 +75,12 @@ fn test_verify_proof_by_solidity_verifier() {
     type INNERC = PoseidonGoldilocksConfig;
     type F = <INNERC as GenericConfig<D>>::F;
 
-    let proof_id = "8-4";
+    let proof_id = "16-4";
     let high_rate_proof = load_fri_proof::<F, INNERC, D>(proof_id).unwrap();
 
     // load and compile solidity
-    let verifier_solidity = std_ops::load_solidity("8-4s_verifier.sol").expect("load `8-4s_verifier.sol` error");
-    let vk_solidity = std_ops::load_solidity("8-4s_vk.sol").expect("load `8-4s_vk.sol` error");
+    let verifier_solidity = std_ops::load_solidity(format!("{proof_id}_verifier.sol")).expect(&format!("load `{proof_id}_verifier.sol` error"));
+    let vk_solidity = std_ops::load_solidity(format!("{proof_id}_vk.sol")).expect(&format!("load `{proof_id}_vk.sol` error"));
     let mut evm = Evm::default();
     let verifier_creation_code = compile_solidity(&verifier_solidity);
     let verifier_address = evm.create(verifier_creation_code);
@@ -86,7 +88,38 @@ fn test_verify_proof_by_solidity_verifier() {
     let vk_address = evm.create(vk_creation_code);
 
     // the `instances` are the public inputs
-    let (proof, instances) = generate_kzg_proof(high_rate_proof, &kzg_param, None).unwrap();
+    let (proof, instances) = generate_kzg_proof(high_rate_proof, &kzg_param, Some(proof_id.to_string())).unwrap();
+    
+    let calldata = encode_calldata(Some(vk_address.into()), &proof, &instances);
+    let (gas_cost, _output) = evm.call(verifier_address, calldata);
+    info!("{}", format!("Gas cost: {}", gas_cost).yellow().bold());
+}
+
+#[test]
+fn test_verify_proof_by_solidity_verifier() {
+    let mut log_builder = env_logger::Builder::from_default_env();
+    log_builder.format_timestamp(None);
+    log_builder.filter_level(LevelFilter::Info);
+    log_builder.try_init().unwrap();
+
+    let proof_id = "16-4";
+
+    // load and compile solidity
+    let verifier_solidity = std_ops::load_solidity(format!("{proof_id}_verifier.sol")).expect(&format!("load `{proof_id}_verifier.sol` error"));
+    let vk_solidity = std_ops::load_solidity(format!("{proof_id}_vk.sol")).expect(&format!("load `{proof_id}_vk.sol` error"));
+    let mut evm = Evm::default();
+    let verifier_creation_code = compile_solidity(&verifier_solidity);
+    let verifier_address = evm.create(verifier_creation_code);
+    let vk_creation_code = compile_solidity(&vk_solidity);
+    let vk_address = evm.create(vk_creation_code);
+
+    // the `instances` are the public inputs
+    // let (proof, instances) = generate_kzg_proof(high_rate_proof, &kzg_param, Some(proof_id.to_string())).unwrap();
+    let proof = std_ops::load_snark_proof(format!("{proof_id}_snark_proof.json")).expect(&format!("load proof: {} error", proof_id));
+    let instances = std_ops::load_snark_instances(format!("{proof_id}_snark_instances.json")).expect(&format!("load instances: {} error", proof_id));
+    let instances = instances.iter().map(|ins| {
+        Fr::from(*ins)
+    }).collect_vec();
     
     let calldata = encode_calldata(Some(vk_address.into()), &proof, &instances);
     let (gas_cost, _output) = evm.call(verifier_address, calldata);

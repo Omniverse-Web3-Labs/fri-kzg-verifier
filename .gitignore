@@ -1,3 +1,4 @@
-target/
-data-circuit/
-generated-sc/
+/target
+/data-circuit
+/generated-sc
+/snark-proof

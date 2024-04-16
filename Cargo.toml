@@ -19,7 +19,7 @@ client-verifier = {path = "../zk-omni-executor/client-verifier"}                
 
 anyhow = "1.0.56"  
 log = "0.4.14"
-env_logger = "0.10.0"
+env_logger = "0.11.3"
 itertools = { version = "0.11.0", default-features = false }
 rand = "0.8"
 dirs = "5.0.1"

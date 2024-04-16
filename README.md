@@ -21,7 +21,10 @@ cargo test -r --test test_verifier_solidity -- test_verifier_solidity --exact --
 
 cargo test -r --test test_verifier_solidity -- test_v_s_with_kzg_loaded --exact --nocapture --ignored
 
-cargo test -r --test test_verifier_solidity -- test_verify_proof_by_solidity_verifier --exact --nocapture --ignored
+# proof locally
+cargo test -r --test test_verifier_solidity -- test_generate_proof_to_local --exact --nocapture --ignored
+
+cargo test -r --test test_verifier_solidity -- test_verify_proof_by_solidity_verifier --exact --nocapture
 
 ```
 
