@@ -412,6 +412,7 @@ dependencies = [
  "num-bigint 0.3.3",
  "num-integer",
  "num-traits",
+ "serde",
 ]
 
 [[package]]
@@ -502,6 +503,7 @@ checksum = "a2bd12c1caf447e69cd4528f47f94d203fd2582878ecb9e9465484c4148a8223"
 name = "cached-smt-db"
 version = "0.1.0"
 dependencies = [
+ "exec-system",
  "hex",
  "plonky2",
  "plonky2_ecdsa",
@@ -533,7 +535,11 @@ checksum = "8eaf5903dcbc0a39312feb77df2ff4c76387d591b9fc7b04a238dcf8bb62639a"
 dependencies = [
  "android-tzdata",
  "iana-time-zone",
+ "js-sys",
  "num-traits",
+ "rustc-serialize",
+ "serde",
+ "wasm-bindgen",
  "windows-targets 0.52.4",
 ]
 
@@ -944,6 +950,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "envy"
+version = "0.4.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3f47e0157f2cb54f5ae1bd371b30a2ae4311e1c028f575cd4e81de7353215965"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "equivalent"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -964,6 +979,17 @@ name = "event-listener"
 version = "2.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0206175f82b8d6bf6652ff7d71a1e27fd2e4efde587fd368662814d6ec1d9ce0"
+
+[[package]]
+name = "exec-system"
+version = "0.1.0"
+dependencies = [
+ "dotenv",
+ "env_logger 0.11.3",
+ "envy",
+ "log",
+ "serde",
+]
 
 [[package]]
 name = "fastrand"
@@ -1447,6 +1473,25 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7a5bbe824c507c5da5956355e86a746d82e0e1464f65d862cc5e71da70e94b2c"
 dependencies = [
  "cfg-if",
+]
+
+[[package]]
+name = "interact"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "bigdecimal",
+ "chrono",
+ "exec-system",
+ "hex",
+ "log",
+ "num-bigint 0.3.3",
+ "serde",
+ "serde_bytes",
+ "serde_json",
+ "sqlx",
+ "syn 1.0.109",
+ "tokio",
 ]
 
 [[package]]
@@ -2390,6 +2435,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3e75f6a532d0fd9f7f13144f392b6ad56a32696bfcd9c78f797f16bbb6f072d6"
 
 [[package]]
+name = "rustc-serialize"
+version = "0.3.25"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fe834bc780604f4674073badbad26d7219cadfb4a2275802db12cbae17498401"
+
+[[package]]
 name = "rustc_version"
 version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2536,6 +2587,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3fb1c873e1b9b056a4dc4c0c198b24c3ffa059243875552b2bd0933b1aee4ce2"
 dependencies = [
  "serde_derive",
+]
+
+[[package]]
+name = "serde_bytes"
+version = "0.11.14"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8b8497c313fd43ab992087548117643f6fcd935cbf36f176ffda0aacf9591734"
+dependencies = [
+ "serde",
 ]
 
 [[package]]
@@ -3467,8 +3527,12 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "cached-smt-db",
+ "chrono",
  "circuit-local-storage",
+ "colored",
  "env_logger 0.11.3",
+ "exec-system",
+ "interact",
  "itertools 0.11.0",
  "log",
  "num",
@@ -3478,6 +3542,7 @@ dependencies = [
  "plonky2_u32",
  "rand",
  "rayon",
+ "serde",
  "tokio",
  "zk-6358",
 ]
