@@ -118,7 +118,7 @@ fn test_verify_proof_by_solidity_verifier() {
     let proof = std_ops::load_snark_proof(format!("{proof_id}_snark_proof.json")).expect(&format!("load proof: {} error", proof_id));
     let instances = std_ops::load_snark_instances(format!("{proof_id}_snark_instances.json")).expect(&format!("load instances: {} error", proof_id));
     let instances = instances.iter().map(|ins| {
-        Fr::from(*ins)
+        Fr::from(u64::from_str_radix(ins, 10).unwrap())
     }).collect_vec();
     
     let calldata = encode_calldata(Some(vk_address.into()), &proof, &instances);
