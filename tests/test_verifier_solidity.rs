@@ -75,7 +75,7 @@ fn test_generate_proof_to_local() {
     type INNERC = PoseidonGoldilocksConfig;
     type F = <INNERC as GenericConfig<D>>::F;
 
-    let proof_id = "16-4";
+    let proof_id = "8-4";
     let high_rate_proof = load_fri_proof::<F, INNERC, D>(proof_id).unwrap();
 
     // load and compile solidity
@@ -102,7 +102,7 @@ fn test_verify_proof_by_solidity_verifier() {
     log_builder.filter_level(LevelFilter::Info);
     log_builder.try_init().unwrap();
 
-    let proof_id = "16-4";
+    let proof_id = "8-4";
 
     // load and compile solidity
     let verifier_solidity = std_ops::load_solidity(format!("{proof_id}_verifier.sol")).expect(&format!("load `{proof_id}_verifier.sol` error"));
