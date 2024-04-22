@@ -1,6 +1,5 @@
 
-use circuit_local_storage::circuit::p_v_io::{read_ppis_from_local, PVDataPath};
-use client_verifier::circuit::verify_from_file::PureVerifier;
+use std::fs;
 
 use colored::Colorize;
 use halo2_proofs::{
@@ -9,7 +8,7 @@ use halo2_proofs::{
 };
 
 use plonky2::{
-    field::extension::Extendable, hash::hash_types::RichField, plonk::{circuit_data::VerifierCircuitData, config::{GenericConfig, PoseidonGoldilocksConfig}}
+    field::extension::Extendable, hash::hash_types::RichField, plonk::{circuit_data::{CommonCircuitData, VerifierCircuitData, VerifierOnlyCircuitData}, config::{GenericConfig, PoseidonGoldilocksConfig}, proof::ProofWithPublicInputs}, util::serialization::DefaultGateSerializer
 };
 
 use plonky2_ecdsa::gadgets::recursive_proof::{recursive_proof_2, ProofTuple};
@@ -19,16 +18,31 @@ use semaphore_aggregation::plonky2_verifier::{bn245_poseidon::plonky2_config::{s
 use log::info;
 use anyhow::Result;
 
+const FRI_PROOF_DIR: &str = "./data-circuit";
+
 pub fn load_fri_proof
 <F: RichField + Extendable<D>, C: GenericConfig<D, F = F>, const D: usize>
 (hrr_proof_id: &str) -> Result<ProofTuple<F, C, D>> 
 {
-    let pv_path = PVDataPath::new(hrr_proof_id);
 
-    let vd = VerifierCircuitData::<F, C, D>::load_from_file(&pv_path.verifier_only_path, &pv_path.common_path);
+    let vod_path = format!("{}/{}_vod", FRI_PROOF_DIR, hrr_proof_id);
+    let ccd_path = format!("{}/{}_ccd", FRI_PROOF_DIR, hrr_proof_id);
+    let ppis_path = format!("{}/{}_ppis.json", FRI_PROOF_DIR, hrr_proof_id);
 
-    let ppis = read_ppis_from_local::<F, C, D>(&pv_path.ppis_path);
-    // vd.verify(ppis).unwrap();
+    let vod = fs::read(vod_path).unwrap();
+    let verifier_only = VerifierOnlyCircuitData::<C, D>::from_bytes(vod).unwrap();
+
+    let gate_serializer = DefaultGateSerializer;
+    let ccd = fs::read(ccd_path).unwrap();
+    let common = CommonCircuitData::<F, D>::from_bytes(ccd, &gate_serializer).unwrap();
+
+    let ppis = fs::read(ppis_path).unwrap();
+    let ppis: ProofWithPublicInputs<F, C, D> = serde_json::from_slice(&ppis).unwrap();
+    let vd = VerifierCircuitData {
+        verifier_only,
+        common,
+    };
+    vd.verify(ppis.clone()).unwrap();
 
     Ok((ppis, vd.verifier_only, vd.common))
 }

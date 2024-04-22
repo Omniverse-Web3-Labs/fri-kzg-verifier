@@ -13,10 +13,8 @@ halo2_proofs = { git = "https://github.com/privacy-scaling-explorations/halo2", 
 semaphore_aggregation ={ path = "../community/stark-verifier" }     # https://github.com/xiyu1984/stark-verifier
 halo2_solidity_verifier = {path="../community/halo2-solidity-verifier", features=["evm"]}       # https://github.com/xiyu1984/halo2-solidity-verifier
 
-circuit-local-storage = {path = "../zk-omni-executor/circuit-local-storage"}    # https://github.com/Omniverse-Web3-Labs/zk-omni-executor/tree/mac-sonoma-14.4 # private currently
-zk-6358-prover = {path = "../zk-omni-executor/zk-6358-prover"}                  # https://github.com/Omniverse-Web3-Labs/zk-omni-executor/tree/mac-sonoma-14.4 # private currently
-client-verifier = {path = "../zk-omni-executor/client-verifier"}                # https://github.com/Omniverse-Web3-Labs/zk-omni-executor/tree/mac-sonoma-14.4 # private currently
-
+serde = { version = "1.0.188", features = ["derive"] }
+serde_json = { version = "1.0" }
 anyhow = "1.0.56"  
 log = "0.4.14"
 env_logger = "0.11.3"
