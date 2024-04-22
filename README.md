@@ -9,6 +9,8 @@ cargo test -r --package fri-kzg-verifier --lib -- exec::mock_verifier::tests::te
 
 cargo test -r --package fri-kzg-verifier --lib -- exec::mock_verifier::tests::test_evm_verifier_from_local --exact --nocapture --ignored
 
+cargo test -r --package fri-kzg-verifier --lib -- exec::mock_verifier::tests::test_fake_proof_verifier_evm --exact --nocapture --ignored
+
 ```
 
 ## Integrated Test
@@ -25,6 +27,11 @@ cargo test -r --test test_verifier_solidity -- test_v_s_with_kzg_loaded --exact 
 cargo test -r --test test_verifier_solidity -- test_generate_proof_to_local --exact --nocapture --ignored
 
 cargo test -r --test test_verifier_solidity -- test_verify_proof_by_solidity_verifier --exact --nocapture
+
+# test fake
+cargo test -r --test test_verifier_solidity -- test_fake_proof --exact --nocapture --ignored
+
+cargo test -r --test test_verifier_solidity -- test_verify_fake_proof_by_solidity_verifier --exact --nocapture
 
 ```
 

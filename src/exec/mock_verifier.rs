@@ -53,6 +53,63 @@ pub mod tests {
         Ok((proof, data.verifier_only, data.common))
     }
 
+    fn poseidon_hash_circuit<F: RichField + Extendable<D>,
+    C: GenericConfig<D, F = F>,
+    const D: usize,>() -> Result<recursive_proof::ProofTuple<F, C, D>> {
+
+        // let config = standard_inner_stark_verifier_config();
+        let config = CircuitConfig::standard_ecc_config();
+        let mut builder = CircuitBuilder::<F, D>::new(config);
+        let mut witness = PartialWitness::new();
+
+        (0u64..13).for_each(|i| {
+            let v = F::from_canonical_u64(i);
+            let v_t = builder.add_virtual_target();
+            witness.set_target(v_t, v);
+            let hash_t = builder.hash_n_to_hash_no_pad::<PoseidonHash>(vec![v_t]);
+            builder.register_public_inputs(&hash_t.elements);
+        });
+
+        let data = builder.build::<C>();
+        let proof = data.prove(witness).unwrap();
+
+        data.verify(proof.clone()).expect("verify error");
+
+        info!("The public hash inputs are: {:?}", proof.public_inputs);
+
+        Ok((proof, data.verifier_only, data.common))
+    }
+
+    #[test]
+    #[ignore]
+    fn test_fake_proof_verifier_evm() {
+        let mut log_builder = env_logger::Builder::from_default_env();
+        log_builder.format_timestamp(None);
+        log_builder.filter_level(LevelFilter::Info);
+        log_builder.try_init().unwrap();
+
+        const D: usize = 2;
+        type INNERC = PoseidonGoldilocksConfig;
+        type F = <INNERC as GenericConfig<D>>::F;
+
+        let inner_proof = poseidon_hash_circuit::<F, INNERC, D>().unwrap();
+
+        // let st_config = standard_inner_stark_verifier_config();
+        let st_config = CircuitConfig::standard_recursion_config();
+        let st_config = CircuitConfig {
+            fri_config: FriConfig {
+                rate_bits: 7,
+                proof_of_work_bits: 16,
+                num_query_rounds: 12,
+                ..st_config.fri_config.clone()
+            },
+            ..st_config
+        };
+        let middle_proof = recursive_proof_2::<F, INNERC, INNERC, D>(&vec![inner_proof], &st_config, None).unwrap();
+
+        proof_tuple_to_local("fake", &middle_proof, false).unwrap();
+    }
+
     #[test]
     #[ignore]
     fn test_sc_fir_kzg_verifier_evm() {
