@@ -48,7 +48,7 @@ pub fn load_fri_proof
 }
 
 pub fn generate_kzg_verifier
-(high_rate_proof: ProofTuple<plonky2::field::goldilocks_field::GoldilocksField, PoseidonGoldilocksConfig, 2>, degree: u32, kzg_param: &ParamsKZG<Bn256>, save: Option<String>) -> Result<()>
+(high_rate_proof: ProofTuple<plonky2::field::goldilocks_field::GoldilocksField, PoseidonGoldilocksConfig, 2>, degree: u32, kzg_param: &ParamsKZG<Bn256>, save: Option<String>) -> Result<(Vec<u8>, Vec<Fr>)>
 {
     type F = plonky2::field::goldilocks_field::GoldilocksField;
     type INNERC = PoseidonGoldilocksConfig;
@@ -60,9 +60,9 @@ pub fn generate_kzg_verifier
     let final_proof = recursive_proof_2::<F, STRKC, INNERC, D>(&vec![high_rate_proof], &starky_config, None)?;
 
     info!("{}", "start verify in snark".cyan().bold());
-    verify_inside_snark_solidity(degree, final_proof, kzg_param, save);
+    let kzg_proof = verify_inside_snark_solidity(degree, final_proof, kzg_param, save)?;
     
-    Ok(())
+    Ok(kzg_proof)
 }
 
 pub fn generate_kzg_proof
